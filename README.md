@@ -169,12 +169,13 @@ python decrypt_from_qr_shared.py --qr encrypted_shared.qr.png --out-file recover
 ```
 
 - This will:
-  -- Reads and decodes the QR or text input automatically. { encrypted_aes_key, iv, ciphertext }.
-  -- Decrypt the AES key using the shared RSA private key (RSA-OAEP, SHA-256).
-  -- Use the AES key + IV to decrypt the ciphertext (AES-GCM).
-  -- Writes the recovered data:
-  As prettified JSON (if it’s valid JSON).
-  Or as a binary file (e.g., image, document, etc.).
+  - Read and decode the QR or text input automatically to extract:
+    `{ encrypted_aes_key, iv, ciphertext }`
+  - Decrypt the AES key using the shared RSA private key (**RSA-OAEP**, SHA-256)
+  - Use the AES key and IV to decrypt the ciphertext (**AES-GCM**)
+  - Write the recovered data:
+    - As **prettified JSON**, if the decrypted content is valid JSON
+    - Or as a **binary file** (e.g., image, document, archive, etc.) if not JSON
 
 ## 🏁 Conclusion
 
