@@ -2,14 +2,23 @@
 
 This is a project form my internship with the minstry of knowledge economy and startups.
 
-This project demonstrates **hybrid encryption** for securely sharing JSON data between two companies.  
+This project demonstrates a hybrid encryption system for securely exchanging data (any file type) between two parties — using RSA and AES-GCM, with the encrypted result encoded into a QR code for convenient transfer.
 The idea:
 
-- ANAE (Sender) encrypts the data of the interpreneur and put it in qr code .
-- the interpreneur (user) gives douan the qr code
-- DOUAN (Receiver) scan it decrypts it.
+- ANAE (Sender) encrypts the entrepreneur’s data and generates a QR code.
+- The entrepreneur (User) presents the QR code to DOUANE (Receiver).
+- DOUANE (Receiver) scans or imports the QR code (or text) and decrypts it to recover the original file.
 
 ---
+
+## ✨ Features
+
+- Supports any input file type (JSON, PDF, image, binary, etc.)
+- Accepts any scanned QR or raw text data as input
+- Hybrid encryption (AES-GCM + RSA-OAEP256)
+- Built-in compression (zlib) for smaller QR codes
+- Works fully offline
+- Cross-platform Python implementation
 
 ## 🚀 How it Works
 
@@ -20,31 +29,32 @@ The idea:
           │        Sender          │
           └────────────┬───────────┘
                        │
-            Generate AES key
+               Generate AES key
                        │
-             Encrypt JSON with AES
+         Encrypt file (any format) with AES-GCM
                        │
-             Encrypt AES key with
-          Receiver's RSA Public Key
+             Encrypt AES key using
+             Receiver's RSA Public Key
                        │
        ┌─────────── Package ───────────────────┐
-       │ { encrypted_aes_key, ciphertext }     │
+       │ { encrypted_aes_key, iv, ciphertext } │
        └───────────────────────────────────────┘
                        │
-                 Convert to QR Code
+                Convert to QR Code
                        │
                        ▼
           ┌────────────────────────┐
           │       Receiver         │
           └────────────┬───────────┘
                        │
-             Scan QR → Extract JSON
+             Scan QR → Extract Envelope
                        │
-     Decrypt AES key with RSA Private Key
+         Decrypt AES key with RSA Private Key
                        │
-       Decrypt ciphertext with AES key
+          Decrypt ciphertext with AES key
                        │
-               Recover original JSON
+             Recover the Original File
+
 
 ```
 
@@ -72,8 +82,9 @@ The idea:
 
 ### ⚡ Why Hybrid?
 
-. AES → Super fast for encrypting large JSON files.
-. RSA → Secure way to exchange AES keys (no need to pre-share a secret).
+. AES → Super Fast, efficient encryption for any file size.
+. RSA → Secure exchange of the AES key without needing a shared secret.
+. zlib Compression: Reduces data size before encryption, allowing smaller QR codes.
 
 ### 📦 Project Setup
 
@@ -108,48 +119,64 @@ python generate_shared_keys.py --out-dir keys --bits 3072 --encrypt-private
 
 ```
 
-2. Encrypt JSON and Create QR Code
+- This will create:
+  -- keys/private.pem (private key, encrypted with passphrase)
+  -- keys/public.pem (public key)
 
-- Prepare a JSON file, e.g. user_123.json.
+2. Encrypt Any File and Create a QR Code
+
+- Encrypt and generate a QR for any input file:
 
 Run:
 
 ```shell
-python encrypt_to_qr_shared.py --in-json secret_data.json --out-png encrypted_shared.qr.png
+python encrypt_to_qr_shared.py --input-file example.png --out-png encrypted_shared.qr.png
+```
 
-# Example with explicit public key path:
+- Optionally specify the RSA public key:
 
-# python encrypt_to_qr_shared.py --public-key keys/system_public.pem --in-json secret_data.json --out-png encrypted_shared.qr.png
+```shell
+python encrypt_to_qr_shared.py --public-key keys/system_public.pem --input-file report.pdf --out-png encrypted_report.qr.png
+
 ```
 
 - This will:
   -- Compress the JSON data with zlib.
   -- Generate a random AES-256 key and 96-bit IV.
-  -- Encrypt the JSON using AES-GCM (authenticated symmetric encryption).
+  -- Encrypt the file using AES-GCM (authenticated symmetric encryption).
   -- Encrypt (wrap) the AES key with the shared RSA public key using RSA-OAEP (SHA-256).
   -- Package { encrypted_aes_key, iv, ciphertext } into a compact JSON envelope.
   -- Convert that envelope into a QR code → encrypted_shared.qr.png.
 
-3. Scan QR and Decrypt
+3. Decrypt from QR (or Text)
 
-- To recover the original JSON from the QR code using the shared private key:
+- Decrypt the QR code and recover the original file::
 
 ```shell
-# Windows
-python scan_and_decrypt_shared.py --qr encrypted_shared.qr.png --private-key keys/system_private.pem --out-json recovered.json --passphrase mysecret
+python decrypt_from_qr_shared.py --qr encrypted_shared.qr.png --private-key keys/system_private.pem --out-file recovered.bin --passphrase mysecret
 
 # --qr → QR code image to decrypt.
 # --private-key → path to the shared RSA private key.
-# --out-json → output file for the decrypted JSON.
+# --out-file → output file for the decrypted JSON.
 # --passphrase → password for the private key (if encrypted).
+```
 
-# Simpler example (no passphrase):
-# python scan_and_decrypt_shared.py --qr encrypted_shared.qr.png --out-json recovered.json
+- Simpler example (no passphrase):
+
+```shell
+python decrypt_from_qr_shared.py --qr encrypted_shared.qr.png --out-file recovered.bin
+
 ```
 
 - This will:
-  -- Read the QR code and extract the JSON envelope { encrypted_aes_key, iv, ciphertext }.
+  -- Reads and decodes the QR or text input automatically. { encrypted_aes_key, iv, ciphertext }.
   -- Decrypt the AES key using the shared RSA private key (RSA-OAEP, SHA-256).
   -- Use the AES key + IV to decrypt the ciphertext (AES-GCM).
-  -- Decompress the result with zlib to obtain the original JSON.
-  -- Save the recovered JSON as recovered.json.
+  -- Writes the recovered data:
+  As prettified JSON (if it’s valid JSON).
+  Or as a binary file (e.g., image, document, etc.).
+
+## 🏁 Conclusion
+
+This system ensures secure and efficient data exchange between two parties without requiring an online connection.
+It supports any file format, accepts any QR or text input, and guarantees end-to-end encryption with modern cryptographic standards.
