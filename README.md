@@ -141,12 +141,12 @@ python encrypt_to_qr_shared.py --public-key keys/system_public.pem --input-file 
 ```
 
 - This will:
-  -- Compress the JSON data with zlib.
-  -- Generate a random AES-256 key and 96-bit IV.
-  -- Encrypt the file using AES-GCM (authenticated symmetric encryption).
-  -- Encrypt (wrap) the AES key with the shared RSA public key using RSA-OAEP (SHA-256).
-  -- Package { encrypted_aes_key, iv, ciphertext } into a compact JSON envelope.
-  -- Convert that envelope into a QR code → encrypted_shared.qr.png.
+  - Compress the input data using **zlib** to reduce size
+  - Generate a random **AES-256 key** and a 96-bit **IV (nonce)**
+  - Encrypt the file using **AES-GCM** (authenticated symmetric encryption)
+  - Encrypt (wrap) the AES key with the shared **RSA public key** using **RSA-OAEP (SHA-256)**
+  - Package `{ encrypted_aes_key, iv, ciphertext }` into a compact JSON envelope
+  - Convert that envelope into a **QR code** → `encrypted_shared.qr.png`
 
 3. Decrypt from QR (or Text)
 
