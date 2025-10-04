@@ -74,17 +74,21 @@ The idea:
 
 ### 🔓 Decryption side (Receiver / Decrypter):
 
-1.Scan the QR → extract {encrypted_aes_key, ciphertext}.
-2.Use the RSA private key to decrypt encrypted_aes_key.
-3.Recover the original AES key.
-4.Use AES key to decrypt the JSON payload.
-5.Write out the recovered JSON file.
+1. Scan the QR code and extract `{ encrypted_aes_key, ciphertext }`
+2. Use the **RSA private key** to decrypt `encrypted_aes_key`
+3. Recover the original **AES key**
+4. Use the AES key to decrypt the **JSON payload**
+5. Write out the recovered file:
+   - As **formatted JSON**, if the decrypted content is valid JSON
+   - Or as a **binary file** (e.g., image, document, etc.)
 
 ### ⚡ Why Hybrid?
 
-. AES → Super Fast, efficient encryption for any file size.
-. RSA → Secure exchange of the AES key without needing a shared secret.
-. zlib Compression: Reduces data size before encryption, allowing smaller QR codes.
+### ⚡ Why Hybrid?
+
+- **AES** → Super fast and efficient for encrypting any file size
+- **RSA** → Securely exchanges the AES key without needing a shared secret
+- **zlib Compression** → Reduces data size before encryption, producing smaller QR codes
 
 ### 📦 Project Setup
 
