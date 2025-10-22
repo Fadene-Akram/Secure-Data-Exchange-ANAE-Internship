@@ -93,3 +93,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+# image-based alternative : python encrypt_to_qr_shared.py --input-file secret.json --out-png encrypted_qr.png
+# QR + optional JSON envelope
+# python encrypt_to_qr_shared.py --input-file secret.json --out-png encrypted_qr.png --out-envelope encrypted_data.json

@@ -84,8 +84,6 @@ The idea:
 
 ### ⚡ Why Hybrid?
 
-### ⚡ Why Hybrid?
-
 - **AES** → Super fast and efficient for encrypting any file size
 - **RSA** → Securely exchanges the AES key without needing a shared secret
 - **zlib Compression** → Reduces data size before encryption, producing smaller QR codes
@@ -126,6 +124,8 @@ python generate_shared_keys.py --out-dir keys --bits 3072 --encrypt-private
 - This will create:
   -- keys/private.pem (private key, encrypted with passphrase)
   -- keys/public.pem (public key)
+
+  After key generation, the script automatically makes both key files read-only (or immutable on Linux systems) to prevent accidental modification.
 
 2. Encrypt Any File and Create a QR Code
 

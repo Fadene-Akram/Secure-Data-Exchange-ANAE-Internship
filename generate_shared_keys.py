@@ -3,6 +3,25 @@ from cryptography.hazmat.primitives import serialization
 import argparse
 from pathlib import Path
 import getpass
+import os
+import stat
+import platform
+import subprocess
+
+def make_file_immutable(file_path: Path):
+    """Make a file read-only or immutable depending on OS."""
+    if platform.system() == "Windows":
+        # Windows: remove write permissions
+        os.chmod(file_path, stat.S_IREAD)
+    else:
+        # Unix/Linux/macOS: make immutable (needs sudo/root)
+        try:
+            subprocess.run(["chattr", "+i", str(file_path)], check=True)
+            print(f"File {file_path} set to immutable (+i).")
+        except Exception:
+            # fallback: at least make it read-only
+            file_path.chmod(0o444)
+            print(f"File {file_path} made read-only (no write perms).")
 
 def main():
     ap = argparse.ArgumentParser(description="Generate one shared RSA key pair")
@@ -27,6 +46,7 @@ def main():
     priv_path = out / "system_private.pem"
     pub_path  = out / "system_public.pem"
 
+    # write keys
     with open(priv_path, "wb") as f:
         f.write(private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -40,8 +60,12 @@ def main():
             format=serialization.PublicFormat.SubjectPublicKeyInfo,
         ))
 
-    print(f"Wrote:\n  {priv_path}\n  {pub_path}\n"
-          f"KEEP system_private.pem SECRET. Share system_public.pem.")
+    # make files immutable or read-only
+    make_file_immutable(priv_path)
+    make_file_immutable(pub_path)
+
+    print(f"\nWrote:\n  {priv_path}\n  {pub_path}")
+    print("Keys are now protected from modification.")
 
 if __name__ == "__main__":
     main()
